@@ -1,0 +1,32 @@
+# (DO NOT MOVE THIS). Serves as a copy for the server.
+title 					= "Hermes Config File"
+
+[cache]
+shards 					= 100 # This is the number of shard used by the whole cache.
+size 					= 256 # This is the total allocated memory for hermes. Value here is in MB. This will be divided among the number of shards (size / # shards).
+
+# This is the lambda value used by lrfu, the range is between 0 and 1 (lru to lfu). This type of cache generalizes both LFU and LRU. Having it here gives us an option to choose between LRU and LFU algorithmically, and take advantage of their behaviors.
+lambda 					= 0.65
+
+# This is an implementation of a bloom filter called cuckoo filter. The goal was to be the frontline for the initial set() requests if it's only just encountered for the first time, thus avoiding one-hit wonders (items that may or may not be retrieved again), to increase the quality of hermes' hit rate (and allocate space to important items ONLY).
+# When a first data set() is requested, it checks the filter first, if it's not there, it'll be added to the filter, and no set operation is done. If it's set the second time, it'll be added to the cache.
+[filter]
+enabled 				= true
+default_filter_count 	= 1000000 # default number of items to be added to filter
+
+# frontend stuff
+[http]
+host 					= 8080 # local port address used by http frontend. This node.
+access_log_location 	= "access.log" # location of access.log file
+
+# peer observation and discovery
+[peers]
+listen 						= 9080 	# local port address for peers to listen on this node.
+peer_listen_port 			= 9999 	# this is udp broadcast port for peer discovery.
+heartbeat 					= 250 	# default heartbeat used for smudge. in ms.
+multicast_enabled 			= true 	# multicast for peer discovery enabled?
+multicast_cluster_name 		= "hermes" # cluster name for multicast broadcast.
+multicast_address 			= "224.0.0.0" # multicast address.
+multicast_port 				= 9998 # multicast port.
+multicast_announce_interval = 10 # multicast announcement interval in seconds.
+nodes 						= [] # list of peers, e.g. ["192.168.0.30", "192.168.0.5"], i.e. other hermes node other than this node.
